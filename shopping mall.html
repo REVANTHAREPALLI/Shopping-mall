@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nextmartShop - Your Modern Store</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use Inter font and custom colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1E40AF',
+                        'secondary-gray': '#F3F4F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for a clean layout */
+        .cart-icon {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .cart-icon:hover {
+            transform: scale(1.05);
+        }
+        .add-to-cart-btn {
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .add-to-cart-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen flex flex-col font-sans">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#" class="text-3xl font-bold text-primary-blue tracking-tight">Stellar Shop</a>
+            
+            <!-- Search Bar (hidden on small screens) -->
+            <div class="hidden md:block w-full max-w-lg mx-8">
+                <input type="text" placeholder="Search products..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150">
+            </div>
+
+            <!-- Icons/Actions -->
+            <div class="flex items-center space-x-4">
+                <button class="cart-icon p-2 relative" id="openCartButton">
+                    <!-- Icon: Shopping Cart (using inline SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 hover:text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span id="cartCount" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center -mt-1">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-8 text-center md:text-left">Featured Products</h1>
+
+        <!-- Product Grid -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Products will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Stellar Shop. All rights reserved. | Built with Tailwind CSS.</p>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal (Hidden by default) -->
+    <div id="cartModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden" onclick="closeCart()">
+        <div class="fixed right-0 top-0 w-full md:w-96 h-full bg-white shadow-2xl p-6 overflow-y-auto" 
+             onclick="event.stopPropagation()">
+            
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Your Cart</h2>
+                <button onclick="closeCart()" class="text-gray-500 hover:text-red-500 text-2xl leading-none">&times;</button>
+            </div>
+
+            <div id="cartItemsContainer">
+                <!-- Cart items will be injected here -->
+                <p id="emptyCartMessage" class="text-center text-gray-500">Your cart is empty.</p>
+            </div>
+
+            <div id="cartSummary" class="mt-8 pt-4 border-t">
+                <div class="flex justify-between items-center text-xl font-semibold mb-4">
+                    <span>Total:</span>
+                    <span id="cartTotal">$0.00</span>
+                </div>
+                <button class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition duration-150 shadow-lg">
+                    Proceed to Checkout
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript for Product Data and Cart Logic -->
+    <script>
+        // --- DATA ---
+        const products = [
+            { id: 1, name: "Vintage Denim Jacket", price: 79.99, image: "https://m.media-amazon.com/images/I/71bhYs2-FcL._UY1100_.jpg" },
+            { id: 2, name: "Minimalist Leather Tote", price: 124.50, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiUprM1tD5jIYfrbufimgKaMP8X2kx2zWLzOW-jK8PGxXT5hEI_UuAm50DQuym0Bzqu6s&usqp=CAU", description: "Perfect for daily essentials and a laptop." },
+            { id: 3, name: "Smart Watch Series 9", price: 349.00, image: "https://image.made-in-china.com/202f0j00pNWoMjUhCPkY/49mm-Hw69-Ultra-2-Smart-Watch-Series-9-Smart-Watch-Bt-Full-Touch-Screen-Heart-Rate-Smartwatch-Ultra-2-Watch-Pk-HK9-Hello-3-.webp", description: "Track health, fitness, and notifications." },
+            { id: 4, name: "Wireless Noise Cancelling Headphones", price: 199.99, image: "https://cdn.thewirecutter.com/wp-content/media/2025/05/BEST-NOISE-CANCELLING-HEADPHONES-8246-2x1-1.jpg?width=2048&quality=75&crop=2:1&auto=webp", description: "Immersive sound quality with deep bass." },
+            { id: 5, name: "Luxury Scented Candle Set", price: 45.00, image: "https://houseofaroma.in/wp-content/uploads/2023/06/scented-candles-gift-set-2.webp", description: "Includes Lavender, Sandalwood, and Vanilla." },
+            { id: 6, name: "Ergonomic Office Chair", price: 299.99, image: "https://images-cdn.ubuy.co.in/633f99440e3c67529c1ba402-ergonomic-office-chair-high-back-mesh.jpg", description: "Designed for all-day comfort and support." },
+            { id: 7, name: "Portable Bluetooth Speaker", price: 65.00, image: "https://cdn.thewirecutter.com/wp-content/media/2024/11/portablebluetoothspeakers-2048px-9130.jpg?auto=webp&quality=75&width=1024", description: "Waterproof design, 12-hour battery life." },
+            { id: 8, name: "Organic Cotton T-Shirt (3-Pack)", price: 35.99, image: "https://theperfectjean.nyc/cdn/shop/files/1_CrewComboColorOne_3.jpg?v=1692915415&width=1500", description: "Soft, breathable, and sustainably sourced." },
+        ];
+
+        let cart = []; // The main cart array: [{ id: 1, name: "...", price: 79.99, quantity: 1 }, ...]
+
+        // --- DOM REFERENCES ---
+        const productGrid = document.getElementById('productGrid');
+        const cartModal = document.getElementById('cartModal');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartCount = document.getElementById('cartCount');
+        const cartTotalDisplay = document.getElementById('cartTotal');
+        const emptyCartMessage = document.getElementById('emptyCartMessage');
+        const openCartButton = document.getElementById('openCartButton');
+        
+        // --- CART FUNCTIONS ---
+
+        /**
+         * Adds an item to the cart or increments its quantity.
+         * @param {number} productId 
+         */
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+
+            renderCart();
+            openCart();
+        }
+
+        /**
+         * Renders the cart contents and updates the count/total.
+         */
+        function renderCart() {
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                emptyCartMessage.classList.remove('hidden');
+                cartTotalDisplay.textContent = '$0.00';
+                cartCount.textContent = '0';
+                return;
+            }
+
+            emptyCartMessage.classList.add('hidden');
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                const cartItemHtml = `
+                    <div class="flex items-center space-x-4 py-3 border-b">
+                        <img src="${item.image}" alt="${item.name}" 
+                             class="w-16 h-16 object-cover rounded-lg flex-shrink-0" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/CCCCCC/000000?text=Item'">
+                        
+                        <div class="flex-grow">
+                            <p class="font-semibold text-gray-800 truncate">${item.name}</p>
+                            <p class="text-sm text-gray-500">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-primary-blue">$${itemTotal.toFixed(2)}</span>
+                            <button onclick="removeFromCart(${item.id})"
+                                    class="text-red-500 hover:text-red-700 transition duration-150 p-1 rounded-full hover:bg-red-100">
+                                <!-- Icon: Trash -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                cartItemsContainer.innerHTML += cartItemHtml;
+            });
+
+            // Update Total and Count
+            cartTotalDisplay.textContent = `$${total.toFixed(2)}`;
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+
+        /**
+         * Removes one instance of an item from the cart.
+         * @param {number} productId 
+         */
+        function removeFromCart(productId) {
+            const index = cart.findIndex(item => item.id === productId);
+            
+            if (index !== -1) {
+                if (cart[index].quantity > 1) {
+                    cart[index].quantity -= 1;
+                } else {
+                    cart.splice(index, 1);
+                }
+            }
+
+            renderCart();
+        }
+
+        // --- MODAL FUNCTIONS ---
+
+        function openCart() {
+            cartModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+
+        function closeCart() {
+            cartModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        openCartButton.addEventListener('click', openCart);
+
+
+        // --- PRODUCT RENDERING ---
+
+        /**
+         * Renders all products into the main grid.
+         */
+        function renderProducts() {
+            productGrid.innerHTML = products.map(product => `
+                <div class="bg-white rounded-xl shadow-xl overflow-hidden transform hover:shadow-2xl hover:scale-[1.02] transition duration-300 ease-in-out flex flex-col">
+                    <!-- Product Image -->
+                    <div class="h-48 overflow-hidden">
+                        <img src="${product.image}" alt="${product.name}" 
+                             class="w-full h-full object-cover" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x400/E5E7EB/6B7280?text=Product+Image';">
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">${product.name}</h3>
+                        <p class="text-sm text-gray-500 mb-4 flex-grow">${product.description}</p>
+                        
+                        <!-- Price and Button -->
+                        <div class="flex justify-between items-center mt-auto">
+                            <span class="text-2xl font-bold text-primary-blue">$${product.price.toFixed(2)}</span>
+                            <button onclick="addToCart(${product.id})"
+                                    class="add-to-cart-btn bg-primary-blue text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-800 shadow-md">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize the page
+        window.onload = () => {
+            renderProducts();
+            renderCart(); // Initial cart render
+        };
+    </script>
+</body>
+</html>
